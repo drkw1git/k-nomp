@@ -178,6 +178,11 @@
     #coinInfoClose:hover{
         color: #50f0e3;
     }
+
+    .portList{
+       text-align: left;
+       width: 60%
+    }
 </style>
 
 <div id="holder">
@@ -230,19 +235,56 @@
         <a href="#" class="miningOption" id="nompAppDownload">
             <div class="miningOptionNum">1.</div>
             <div class="miningOptionInstructions">
-                <div>Download NOMP App</div>
-                <div>Our preconfigured app makes mining that easy</div>
+                <div>Prepare</div>
+                <div>Follow https://github.com/koto-dev/wiki/wiki<br>
+                You need a wallet, k1/jz address and miner.</div>
             </div>
         </a>
         <div id="orHolder">
             <div id="orLine"></div>
-            <div id="orText">or</div>
+            <div id="orText">next</div>
         </div>
         <a href="#" class="miningOption" id="coinGlowTrigger">
             <div class="miningOptionNum">2.</div>
             <div class="miningOptionInstructions">
-                <div>Select a coin for connection details</div>
-                <div>Configurations for each coin are available for advanced miners</div>
+                <div>Decide port number by your cpu.</div>
+                <table class="portList">
+                    <tr>
+                        <th>Port</th>
+                        <th>CPU</th>
+                        <th>Init diff</th>
+                        <th>Min diff</th>
+                        <th>Max diff</th>
+                    </tr>
+                    <tr>
+                        <td>15101</td>
+                        <td>Mobile</td>
+                        <td>0.1</td>
+                        <td>0.0001</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td>15102</td>
+                        <td>Normal</td>
+                        <td>0.5</td>
+                        <td>0.05</td>
+                        <td>5</td>
+                    </tr>
+                    <tr>
+                        <td>15103</td>
+                        <td>Hight-end</td>
+                        <td>1</td>
+                        <td>0.1</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td>15104</td>
+                        <td>Cloud</td>
+                        <td>5</td>
+                        <td>0.5</td>
+                        <td>16</td>
+                    </tr>
+                </table>
             </div>
         </a>
     </div>
@@ -312,7 +354,7 @@
 
     $('#nompAppDownload').click(function(event){
         event.preventDefault();
-        alert('NOMP App development still in progress...');
+        window.open('https://github.com/koto-dev/wiki/wiki','_blank');
         return false;
     });
 </script>
