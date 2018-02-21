@@ -95,6 +95,14 @@ function SetupForPool(logger, poolOptions, setupFinished){
 
     var paymentInterval;
     var disablePeymentProcessing = false;
+    
+    var extraRewards = poolOptions.extraRewards;
+    var finderRewardRate = parseFloat(0);
+    if(extraRewards){
+        finderRewardRate = extraRewards.finder / parseFloat(100);
+    }
+	logger.debug(logSystem, logComponent, 'Finder Reward: ' + finderRewardRate * 100);
+
 
     function validateAddress (callback){
         daemon.cmd('validateaddress', [poolOptions.address], function(result) {
@@ -925,9 +933,16 @@ function SetupForPool(logger, poolOptions, setupFinished){
                                         var immature = coinsToSatoshies(round.reward);
                                         var totalShares = parseFloat(0);
                                         var sharesLost = parseFloat(0);
+                                        var finderImmature = parseFloat(0);
 
                                         // adjust block immature .. tx fees
                                         immature = Math.round(immature - feeSatoshi);
+                                        if(finderRewardRate > parseFloat(0)){
+                                        	finderImmature = immature * finderRewardRate;
+                                        	immature -= finderImmature;
+                                        }
+                                    	logger.debug(logSystem, logComponent, 'Finder Immature: ' + finderImmature);
+
 
                                         // find most time spent in this round by single worker
                                         maxTime = 0;
@@ -973,6 +988,21 @@ function SetupForPool(logger, poolOptions, setupFinished){
                                             worker.immature = (worker.immature || 0) + workerImmatureTotal;
                                             totalAmount += workerImmatureTotal;
                                         }
+                                        if(finderRewardRate > parseFloat(0) && workers[round.minedby]){
+	                                    	logger.debug(logSystem, logComponent, 'Finder Worker: ' + round.minedby + 'Immature' + workers[round.minedby].immature + '->' + (workers[round.minedby].immature + finderImmature));
+											workers[round.minedby].immature += finderImmature;
+											totalAmount += finderImmature;
+										}else if(finderImmature > 0){
+	                                    	logger.debug(logSystem, logComponent, 'Finder Not found(Immature): ' + round.minedby);
+	                                        for (var workerAddress in workerShares){
+	                                            var worker = workers[workerAddress] = (workers[workerAddress] || {});
+	                                            var percent = parseFloat(worker.roundShares) / totalShares;
+	                                            // calculate workers immature for this round
+	                                            var workerImmatureTotal = Math.round(finderImmature * percent);
+	                                            worker.immature = (worker.immature || 0) + workerImmatureTotal;
+	                                            totalAmount += workerImmatureTotal;
+	                                        }
+										}
 
                                         //console.log('----------------------------');
                                         break;
@@ -983,9 +1013,15 @@ function SetupForPool(logger, poolOptions, setupFinished){
                                         var reward = coinsToSatoshies(round.reward);
                                         var totalShares = parseFloat(0);
                                         var sharesLost = parseFloat(0);
+                                        var finderReward = parseFloat(0);
 
                                         // adjust block reward .. tx fees
                                         reward = Math.round(reward - feeSatoshi);
+                                        if(finderRewardRate > parseFloat(0)){
+											finderReward = reward * finderRewardRate;
+											reward -= finderReward;
+										}
+                                    	logger.debug(logSystem, logComponent, 'Finder Reward: ' + finderReward);
 
                                         // find most time spent in this round by single worker
                                         maxTime = 0;
@@ -1044,7 +1080,28 @@ function SetupForPool(logger, poolOptions, setupFinished){
                                             worker.reward = (worker.reward || 0) + workerRewardTotal;
                                             totalAmount += workerRewardTotal;
                                         }
+                                        
 
+                                        if(finderRewardRate > parseFloat(0) && workers[round.minedby]){
+	                                    	logger.debug(logSystem, logComponent, 'Finder Worker: ' + round.minedby + 'Reward' + workers[round.minedby].reward + '->' + (workers[round.minedby].reward + finderReward));
+											workers[round.minedby].reward += finderReward;
+											totalAmount += finderReward;
+										}else if(finderReward > 0){
+	                                    	logger.debug(logSystem, logComponent, 'Finder Not found(Reward): ' + round.minedby);
+	                                        for (var workerAddress in workerShares){
+	                                            var worker = workers[workerAddress] = (workers[workerAddress] || {});
+	                                            var percent = parseFloat(worker.roundShares) / totalShares;
+	                                            if (percent > 1.0) {
+	                                                err = true;
+	                                                logger.error(logSystem, logComponent, 'Share percent is greater than 1.0 for '+workerAddress+' round:' + round.height + ' blockHash:' + round.blockHash);
+	                                                return;
+	                                            }
+	                                            // calculate workers reward for this round
+	                                            var workerRewardTotal = Math.round(finderReward * percent);
+	                                            worker.reward = (worker.reward || 0) + workerRewardTotal;
+	                                            totalAmount += workerRewardTotal;
+	                                        }
+										}
                                         //console.log('----------------------------');
                                         break;
                                 }

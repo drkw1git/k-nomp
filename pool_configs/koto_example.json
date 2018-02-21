@@ -16,9 +16,13 @@
     "rewardRecipients": {
         "": 1.0
     },
+    
+    "extraRewards": {
+        "finder": 5.0
+    }
 
     "paymentProcessing": {
-	"minConf": 10,
+        "minConf": 10,
         "enabled": true,
         "paymentMode": "prop",
         "_comment_paymentMode":"prop, pplnt",
